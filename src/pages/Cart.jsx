@@ -10,7 +10,7 @@ const Cart = () => {
   // Fetch orders from backend
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/orders")
+      .get("http://192.168.29.218:4000/api/orders")
       .then((res) => setOrders(res.data))
       .catch((err) => console.error(err));
   }, []);
@@ -28,7 +28,7 @@ const Cart = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5000/api/orders", {
+      const res = await axios.post("http://10.21.218.69:4000/api/orders", {
         tableSlug,
         items: cartItems,
       });

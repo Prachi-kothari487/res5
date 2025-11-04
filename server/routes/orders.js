@@ -820,18 +820,153 @@
 // });
 
 // module.exports = router;
+// const express = require("express");
+// const router = express.Router();
+// const Order = require("../models/Order");
+// const Table = require("../models/Table");
+// const MenuItem = require("../models/MenuItem");
+
+// // ✅ POST /api/orders - Place new order
+// router.post("/", async (req, res) => {
+//   try {
+//     const { tableSlug, items } = req.body;
+//     console.log("📩 Received order:", req.body);
+
+//     if (!tableSlug) {
+//       return res.status(400).json({ success: false, message: "tableSlug is required" });
+//     }
+//     if (!items || !Array.isArray(items) || items.length === 0) {
+//       return res.status(400).json({ success: false, message: "Order must contain items" });
+//     }
+
+//     // Normalize slug
+//     const normalizedSlug = tableSlug.replace(/-/g, "");
+//     const table = await Table.findOne({ qrSlug: normalizedSlug });
+//     if (!table) {
+//       return res.status(404).json({ success: false, message: "Table not found" });
+//     }
+
+//     // Prepare order items
+//     const processedItems = [];
+
+//     for (const item of items) {
+//       const menuItem = await MenuItem.findById(item.menuItemId);
+//       if (!menuItem) {
+//         return res.status(404).json({ success: false, message: `Menu item not found: ${item.menuItemId}` });
+//       }
+
+//       const qty = item.qty && Number(item.qty) > 0 ? Number(item.qty) : 1;
+//       const price = Number(menuItem.price) || 0;
+
+//       processedItems.push({
+//         menuItemId: menuItem._id,
+//         name: menuItem.name,
+//         qty,
+//         price,
+//       });
+//     }
+
+//     const newOrder = new Order({
+//       tableId: table._id,
+//       tableSlug: normalizedSlug,
+//       items: processedItems,
+//       status: "placed",
+//     });
+
+//     await newOrder.save(); // 🧠 totalPrice auto-calculated here
+//     console.log("✅ Order saved successfully:", newOrder._id);
+
+//     return res.status(201).json({
+//       success: true,
+//       message: "Order placed successfully!",
+//       order: newOrder,
+//     });
+//   } catch (error) {
+//     console.error("❌ Error placing order:", error);
+//     return res.status(500).json({ success: false, message: "Failed to place order" });
+//   }
+// });
+
+// // ✅ GET /api/orders - Fetch all orders
+// router.get("/", async (req, res) => {
+//   try {
+//     const orders = await Order.find()
+//       .populate("tableId", "number")
+//       .populate("items.menuItemId", "name price");
+
+//     return res.status(200).json({
+//       success: true,
+//       count: orders.length,
+//       orders,
+//     });
+//   } catch (err) {
+//     console.error("❌ Error fetching orders:", err);
+//     return res.status(500).json({ success: false, message: "Failed to fetch orders" });
+//   }
+// });
+
+// // ✅ GET /api/orders/status/:status - Fetch by status
+// router.get("/status/:status", async (req, res) => {
+//   try {
+//     const { status } = req.params;
+//     const validStatuses = ["placed", "preparing", "served", "cancelled"];
+
+//     if (!validStatuses.includes(status.toLowerCase())) {
+//       return res.status(400).json({ success: false, message: "Invalid status type" });
+//     }
+
+//     const orders = await Order.find({ status })
+//       .populate("tableId", "number")
+//       .populate("items.menuItemId", "name price");
+
+//     return res.status(200).json({
+//       success: true,
+//       count: orders.length,
+//       orders,
+//     });
+//   } catch (err) {
+//     console.error("❌ Error fetching orders by status:", err);
+//     return res.status(500).json({ success: false, message: "Failed to fetch orders by status" });
+//   }
+// });
+
+// // ✅ PATCH /api/orders/:id/status - Update order status
+// router.patch("/:id/status", async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { status } = req.body;
+
+//     if (!status) {
+//       return res.status(400).json({ success: false, message: "Status is required" });
+//     }
+
+//     const order = await Order.findByIdAndUpdate(id, { status }, { new: true });
+//     if (!order) {
+//       return res.status(404).json({ success: false, message: "Order not found" });
+//     }
+
+//     console.log(`✅ Order ${id} status updated to: ${status}`);
+//     return res.status(200).json({ success: true, message: "Order status updated", order });
+//   } catch (err) {
+//     console.error("❌ Error updating order status:", err);
+//     return res.status(500).json({ success: false, message: "Failed to update order status" });
+//   }
+// });
+
+// module.exports = router;
 const express = require("express");
 const router = express.Router();
 const Order = require("../models/Order");
 const Table = require("../models/Table");
 const MenuItem = require("../models/MenuItem");
 
-// ✅ POST /api/orders - Place new order
+// ✅ POST /api/orders — Place new order
 router.post("/", async (req, res) => {
   try {
     const { tableSlug, items } = req.body;
     console.log("📩 Received order:", req.body);
 
+    // 🧩 Validate data
     if (!tableSlug) {
       return res.status(400).json({ success: false, message: "tableSlug is required" });
     }
@@ -839,20 +974,22 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ success: false, message: "Order must contain items" });
     }
 
-    // Normalize slug
-    const normalizedSlug = tableSlug.replace(/-/g, "");
-    const table = await Table.findOne({ qrSlug: normalizedSlug });
+    // ✅ Find table by qrSlug (same as in DB)
+    const table = await Table.findOne({ qrSlug: tableSlug });
     if (!table) {
+      console.log("❌ Table not found for slug:", tableSlug);
       return res.status(404).json({ success: false, message: "Table not found" });
     }
 
-    // Prepare order items
+    // ✅ Process each menu item
     const processedItems = [];
-
     for (const item of items) {
       const menuItem = await MenuItem.findById(item.menuItemId);
       if (!menuItem) {
-        return res.status(404).json({ success: false, message: `Menu item not found: ${item.menuItemId}` });
+        return res.status(404).json({
+          success: false,
+          message: `Menu item not found: ${item.menuItemId}`,
+        });
       }
 
       const qty = item.qty && Number(item.qty) > 0 ? Number(item.qty) : 1;
@@ -866,14 +1003,15 @@ router.post("/", async (req, res) => {
       });
     }
 
+    // ✅ Create new order
     const newOrder = new Order({
       tableId: table._id,
-      tableSlug: normalizedSlug,
+      tableSlug, // same as frontend
       items: processedItems,
       status: "placed",
     });
 
-    await newOrder.save(); // 🧠 totalPrice auto-calculated here
+    await newOrder.save();
     console.log("✅ Order saved successfully:", newOrder._id);
 
     return res.status(201).json({
@@ -887,7 +1025,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// ✅ GET /api/orders - Fetch all orders
+// ✅ GET /api/orders — Fetch all orders
 router.get("/", async (req, res) => {
   try {
     const orders = await Order.find()
@@ -905,7 +1043,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ✅ GET /api/orders/status/:status - Fetch by status
+// ✅ GET /api/orders/status/:status — Fetch by status
 router.get("/status/:status", async (req, res) => {
   try {
     const { status } = req.params;
@@ -930,7 +1068,7 @@ router.get("/status/:status", async (req, res) => {
   }
 });
 
-// ✅ PATCH /api/orders/:id/status - Update order status
+// ✅ PATCH /api/orders/:id/status — Update order status
 router.patch("/:id/status", async (req, res) => {
   try {
     const { id } = req.params;

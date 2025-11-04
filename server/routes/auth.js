@@ -1,28 +1,357 @@
-// // // // //  const express = require('express');
+// // // // // // // //  const express = require('express');
+// // // // // // // // const router = express.Router();
+// // // // // // // // const User = require('../models/User');
+// // // // // // // // const bcrypt = require('bcryptjs');
+// // // // // // // // const jwt = require('jsonwebtoken');
+
+// // // // // // // // router.post('/register', async (req,res)=>{
+// // // // // // // //   const {name,email,password,role} = req.body;
+// // // // // // // //   const hash = await bcrypt.hash(password,10);
+// // // // // // // //   const user = new User({name,email,passwordHash:hash,role});
+// // // // // // // //   await user.save();
+// // // // // // // //   res.json({message:'User registered'});
+// // // // // // // // });
+
+// // // // // // // // router.post('/login', async (req,res)=>{
+// // // // // // // //   const {email,password} = req.body;
+// // // // // // // //   const user = await User.findOne({email});
+// // // // // // // //   if(!user) return res.status(400).json({error:'User not found'});
+// // // // // // // //   const valid = await bcrypt.compare(password,user.passwordHash);
+// // // // // // // //   if(!valid) return res.status(400).json({error:'Invalid password'});
+// // // // // // // //   const token = jwt.sign({id:user._id,role:user.role}, process.env.JWT_SECRET, {expiresIn:process.env.ACCESS_TOKEN_EXPIRES_IN});
+// // // // // // // //   res.json({token,role:user.role});
+// // // // // // // // });
+
+// // // // // // // // module.exports = router;
+// // // // // // // const express = require('express');
+// // // // // // // const router = express.Router();
+// // // // // // // const User = require('../models/User');
+// // // // // // // const bcrypt = require('bcryptjs');
+// // // // // // // const jwt = require('jsonwebtoken');
+
+// // // // // // // // =============================
+// // // // // // // // REGISTER USER (Admin/Staff)
+// // // // // // // // =============================
+// // // // // // // router.post('/register', async (req, res) => {
+// // // // // // //   try {
+// // // // // // //     const { name, email, password, role } = req.body;
+
+// // // // // // //     // Check if user already exists
+// // // // // // //     const existingUser = await User.findOne({ email });
+// // // // // // //     if (existingUser)
+// // // // // // //       return res.status(400).json({ error: 'User already exists' });
+
+// // // // // // //     // Hash password
+// // // // // // //     const hash = await bcrypt.hash(password, 10);
+
+// // // // // // //     // Create user
+// // // // // // //     const user = new User({
+// // // // // // //       name,
+// // // // // // //       email: email.trim().toLowerCase(), // email normalize
+// // // // // // //       passwordHash: hash,
+// // // // // // //       role,
+// // // // // // //     });
+// // // // // // //     await user.save();
+
+// // // // // // //     res.json({ message: 'User registered successfully' });
+// // // // // // //   } catch (err) {
+// // // // // // //     console.error('Register Error:', err);
+// // // // // // //     res.status(500).json({ error: 'Server error' });
+// // // // // // //   }
+// // // // // // // });
+
+// // // // // // // // =============================
+// // // // // // // // LOGIN USER (Admin/Staff)
+// // // // // // // // =============================
+// // // // // // // router.post('/login', async (req, res) => {
+// // // // // // //   try {
+// // // // // // //     const { email, password } = req.body;
+
+// // // // // // //     // Step 1: Validate input
+// // // // // // //     if (!email || !password)
+// // // // // // //       return res.status(400).json({ error: 'Email and password required' });
+
+// // // // // // //     // Step 2: Find user by email
+// // // // // // //     const user = await User.findOne({ email: email.trim().toLowerCase() });
+// // // // // // //     if (!user)
+// // // // // // //       return res.status(400).json({ error: 'Invalid email or password' });
+
+// // // // // // //     // Step 3: Compare password
+// // // // // // //     const isMatch = await bcrypt.compare(password, user.passwordHash);
+// // // // // // //     if (!isMatch)
+// // // // // // //       return res.status(400).json({ error: 'Invalid email or password' });
+
+// // // // // // //     // Step 4: Generate JWT token
+// // // // // // //     const token = jwt.sign(
+// // // // // // //       { id: user._id, role: user.role },
+// // // // // // //       process.env.JWT_SECRET,
+// // // // // // //       { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m' }
+// // // // // // //     );
+
+// // // // // // //     res.json({
+// // // // // // //       message: 'Login successful',
+// // // // // // //       token,
+// // // // // // //       role: user.role,
+// // // // // // //       name: user.name,
+// // // // // // //     });
+// // // // // // //   } catch (err) {
+// // // // // // //     console.error('Login Error:', err);
+// // // // // // //     res.status(500).json({ error: 'Server error' });
+// // // // // // //   }
+// // // // // // // });
+
+// // // // // // // module.exports = router;
+// // // // // // const express = require('express');
+// // // // // // const router = express.Router();
+// // // // // // const User = require('../models/User');
+// // // // // // const bcrypt = require('bcryptjs');
+// // // // // // const jwt = require('jsonwebtoken');
+
+// // // // // // // =============================
+// // // // // // // REGISTER USER (Admin/Staff)
+// // // // // // // =============================
+// // // // // // router.post('/register', async (req, res) => {
+// // // // // //   try {
+// // // // // //     const { name, email, password, role } = req.body;
+
+// // // // // //     const existingUser = await User.findOne({ email });
+// // // // // //     if (existingUser)
+// // // // // //       return res.status(400).json({ error: 'User already exists' });
+
+// // // // // //     const hash = await bcrypt.hash(password, 10);
+// // // // // //     const user = new User({
+// // // // // //       name,
+// // // // // //       email: email.trim().toLowerCase(),
+// // // // // //       passwordHash: hash,
+// // // // // //       role,
+// // // // // //     });
+// // // // // //     await user.save();
+
+// // // // // //     res.json({ message: 'User registered successfully' });
+// // // // // //   } catch (err) {
+// // // // // //     console.error('Register Error:', err);
+// // // // // //     res.status(500).json({ error: 'Server error' });
+// // // // // //   }
+// // // // // // });
+
+// // // // // // // =============================
+// // // // // // // LOGIN USER (Admin/Staff)
+// // // // // // // =============================
+// // // // // // router.post('/login', async (req, res) => {
+// // // // // //   try {
+// // // // // //     const { email, password } = req.body;
+
+// // // // // //     if (!email || !password)
+// // // // // //       return res.status(400).json({ error: 'Email and password required' });
+
+// // // // // //     const user = await User.findOne({ email: email.trim().toLowerCase() });
+
+// // // // // //     // 🟢 Debugging Logs
+// // // // // //     console.log("Login attempt:", email);
+// // // // // //     console.log("User found:", user ? user.email : '❌ Not found');
+
+// // // // // //     if (!user)
+// // // // // //       return res.status(400).json({ error: 'Invalid email or password' });
+
+// // // // // //     const isMatch = await bcrypt.compare(password, user.passwordHash);
+
+// // // // // //     // 🟢 Debugging Logs
+// // // // // //     console.log("Password valid:", isMatch);
+
+// // // // // //     if (!isMatch)
+// // // // // //       return res.status(400).json({ error: 'Invalid email or password' });
+
+// // // // // //     const token = jwt.sign(
+// // // // // //       { id: user._id, role: user.role },
+// // // // // //       process.env.JWT_SECRET,
+// // // // // //       { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m' }
+// // // // // //     );
+
+// // // // // //     res.json({
+// // // // // //       message: 'Login successful',
+// // // // // //       token,
+// // // // // //       role: user.role,
+// // // // // //       name: user.name,
+// // // // // //     });
+// // // // // //   } catch (err) {
+// // // // // //     console.error('Login Error:', err);
+// // // // // //     res.status(500).json({ error: 'Server error' });
+// // // // // //   }
+// // // // // // });
+
+// // // // // // module.exports = router;
+// // // // // router.post('/login', async (req, res) => {
+// // // // //   try {
+// // // // //     const { email, password } = req.body;
+// // // // //     console.log("=====================================");
+// // // // //     console.log("🟢 Login attempt received");
+// // // // //     console.log("📧 Email entered:", email);
+// // // // //     console.log("🔑 Password entered (length):", password ? password.length : 0);
+
+// // // // //     // Step 1: Check input
+// // // // //     if (!email || !password) {
+// // // // //       console.log("❌ Missing email or password");
+// // // // //       return res.status(400).json({ error: 'Email and password required' });
+// // // // //     }
+
+// // // // //     // Step 2: Find user
+// // // // //     const user = await User.findOne({ email: email.trim().toLowerCase() });
+// // // // //     console.log("👤 User found in DB:", user ? user.email : "No user found");
+
+// // // // //     if (!user) {
+// // // // //       console.log("❌ Invalid email — user not found in DB");
+// // // // //       return res.status(400).json({ error: 'Invalid email or password' });
+// // // // //     }
+
+// // // // //     // Step 3: Check password
+// // // // //     const isMatch = await bcrypt.compare(password, user.passwordHash);
+// // // // //     console.log("🔍 Password match status:", isMatch);
+
+// // // // //     if (!isMatch) {
+// // // // //       console.log("❌ Invalid password for:", user.email);
+// // // // //       return res.status(400).json({ error: 'Invalid email or password' });
+// // // // //     }
+
+// // // // //     // Step 4: Generate token
+// // // // //     const token = jwt.sign(
+// // // // //       { id: user._id, role: user.role },
+// // // // //       process.env.JWT_SECRET,
+// // // // //       { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m' }
+// // // // //     );
+
+// // // // //     console.log("✅ Login successful for:", user.email);
+// // // // //     console.log("=====================================");
+
+// // // // //     res.json({
+// // // // //       message: 'Login successful',
+// // // // //       token,
+// // // // //       role: user.role,
+// // // // //       name: user.name,
+// // // // //     });
+
+// // // // //   } catch (err) {
+// // // // //     console.error("💥 Login Error:", err);
+// // // // //     res.status(500).json({ error: 'Server error' });
+// // // // //   }
+// // // // // });
+// // // // // const express = require('express');
 // // // // // const router = express.Router();
 // // // // // const User = require('../models/User');
 // // // // // const bcrypt = require('bcryptjs');
 // // // // // const jwt = require('jsonwebtoken');
 
-// // // // // router.post('/register', async (req,res)=>{
-// // // // //   const {name,email,password,role} = req.body;
-// // // // //   const hash = await bcrypt.hash(password,10);
-// // // // //   const user = new User({name,email,passwordHash:hash,role});
-// // // // //   await user.save();
-// // // // //   res.json({message:'User registered'});
+// // // // // // =============================
+// // // // // // LOGIN ROUTE WITH DEBUG LOGS
+// // // // // // =============================
+// // // // // router.post('/login', async (req, res) => {
+// // // // //   try {
+// // // // //     const { email, password } = req.body;
+// // // // //     console.log("=====================================");
+// // // // //     console.log("🟢 Login attempt received");
+// // // // //     console.log("📧 Email entered:", email);
+// // // // //     console.log("🔑 Password entered (length):", password ? password.length : 0);
+
+// // // // //     if (!email || !password) {
+// // // // //       console.log("❌ Missing email or password");
+// // // // //       return res.status(400).json({ error: 'Email and password required' });
+// // // // //     }
+
+// // // // //     const user = await User.findOne({ email: email.trim().toLowerCase() });
+// // // // //     console.log("👤 User found in DB:", user ? user.email : "No user found");
+
+// // // // //     if (!user) {
+// // // // //       console.log("❌ Invalid email — user not found in DB");
+// // // // //       return res.status(400).json({ error: 'Invalid email or password' });
+// // // // //     }
+
+// // // // //     const isMatch = await bcrypt.compare(password, user.passwordHash);
+// // // // //     console.log("🔍 Password match status:", isMatch);
+
+// // // // //     if (!isMatch) {
+// // // // //       console.log("❌ Invalid password for:", user.email);
+// // // // //       return res.status(400).json({ error: 'Invalid email or password' });
+// // // // //     }
+
+// // // // //     const token = jwt.sign(
+// // // // //       { id: user._id, role: user.role },
+// // // // //       process.env.JWT_SECRET,
+// // // // //       { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m' }
+// // // // //     );
+
+// // // // //     console.log("✅ Login successful for:", user.email);
+// // // // //     console.log("=====================================");
+
+// // // // //     res.json({
+// // // // //       message: 'Login successful',
+// // // // //       token,
+// // // // //       role: user.role,
+// // // // //       name: user.name,
+// // // // //     });
+
+// // // // //   } catch (err) {
+// // // // //     console.error("💥 Login Error:", err);
+// // // // //     res.status(500).json({ error: 'Server error' });
+// // // // //   }
 // // // // // });
 
-// // // // // router.post('/login', async (req,res)=>{
-// // // // //   const {email,password} = req.body;
-// // // // //   const user = await User.findOne({email});
-// // // // //   if(!user) return res.status(400).json({error:'User not found'});
-// // // // //   const valid = await bcrypt.compare(password,user.passwordHash);
-// // // // //   if(!valid) return res.status(400).json({error:'Invalid password'});
-// // // // //   const token = jwt.sign({id:user._id,role:user.role}, process.env.JWT_SECRET, {expiresIn:process.env.ACCESS_TOKEN_EXPIRES_IN});
-// // // // //   res.json({token,role:user.role});
-// // // // // });
-
+// // // // // // ✅ Export router at end
 // // // // // module.exports = router;
+
+
+
+// // // // const express = require('express');
+// // // // const router = express.Router();
+// // // // const jwt = require('jsonwebtoken');
+// // // // const MenuItem = require('../models/MenuItem');
+
+// // // // // ===========================
+// // // // // GET ALL MENU ITEMS
+// // // // // ===========================
+// // // // router.get('/', async (req, res) => {
+// // // //   try {
+// // // //     const token = req.headers.authorization?.split(' ')[1];
+// // // //     if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+// // // //     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+// // // //     const role = decoded.role;
+
+// // // //     let items;
+
+// // // //     if (role === 'staff' || role === 'admin') {
+// // // //       // Staff/Admin can see all menu items
+// // // //       items = await MenuItem.find();
+// // // //     } else {
+// // // //       // Customer view (based on tableSlug)
+// // // //       const tableSlug = req.query.tableSlug;
+// // // //       if (!tableSlug) return res.status(400).json({ error: 'Table slug required' });
+// // // //       items = await MenuItem.find({ tableSlug });
+// // // //     }
+
+// // // //     if (!items || items.length === 0)
+// // // //       return res.json({ message: 'No menu items found' });
+
+// // // //     res.json(items);
+// // // //   } catch (err) {
+// // // //     console.error('Menu fetch error:', err);
+// // // //     res.status(500).json({ error: 'Server error' });
+// // // //   }
+// // // // });
+
+// // // // // ===========================
+// // // // // GET ALL CATEGORIES
+// // // // // ===========================
+// // // // router.get('/categories', async (req, res) => {
+// // // //   try {
+// // // //     // Fetch unique category names from MenuItem model
+// // // //     const categories = await MenuItem.distinct("category");
+// // // //     res.json(categories);
+// // // //   } catch (err) {
+// // // //     console.error('Category fetch error:', err);
+// // // //     res.status(500).json({ error: 'Server error' });
+// // // //   }
+// // // // });
+
+// // // // module.exports = router;
 // // // // const express = require('express');
 // // // // const router = express.Router();
 // // // // const User = require('../models/User');
@@ -30,63 +359,45 @@
 // // // // const jwt = require('jsonwebtoken');
 
 // // // // // =============================
-// // // // // REGISTER USER (Admin/Staff)
-// // // // // =============================
-// // // // router.post('/register', async (req, res) => {
-// // // //   try {
-// // // //     const { name, email, password, role } = req.body;
-
-// // // //     // Check if user already exists
-// // // //     const existingUser = await User.findOne({ email });
-// // // //     if (existingUser)
-// // // //       return res.status(400).json({ error: 'User already exists' });
-
-// // // //     // Hash password
-// // // //     const hash = await bcrypt.hash(password, 10);
-
-// // // //     // Create user
-// // // //     const user = new User({
-// // // //       name,
-// // // //       email: email.trim().toLowerCase(), // email normalize
-// // // //       passwordHash: hash,
-// // // //       role,
-// // // //     });
-// // // //     await user.save();
-
-// // // //     res.json({ message: 'User registered successfully' });
-// // // //   } catch (err) {
-// // // //     console.error('Register Error:', err);
-// // // //     res.status(500).json({ error: 'Server error' });
-// // // //   }
-// // // // });
-
-// // // // // =============================
-// // // // // LOGIN USER (Admin/Staff)
+// // // // // LOGIN ROUTE WITH DEBUG LOGS
 // // // // // =============================
 // // // // router.post('/login', async (req, res) => {
 // // // //   try {
 // // // //     const { email, password } = req.body;
+// // // //     console.log("=====================================");
+// // // //     console.log("🟢 Login attempt received");
+// // // //     console.log("📧 Email entered:", email);
+// // // //     console.log("🔑 Password entered (length):", password ? password.length : 0);
 
-// // // //     // Step 1: Validate input
-// // // //     if (!email || !password)
+// // // //     if (!email || !password) {
+// // // //       console.log("❌ Missing email or password");
 // // // //       return res.status(400).json({ error: 'Email and password required' });
+// // // //     }
 
-// // // //     // Step 2: Find user by email
 // // // //     const user = await User.findOne({ email: email.trim().toLowerCase() });
-// // // //     if (!user)
-// // // //       return res.status(400).json({ error: 'Invalid email or password' });
+// // // //     console.log("👤 User found in DB:", user ? user.email : "No user found");
 
-// // // //     // Step 3: Compare password
+// // // //     if (!user) {
+// // // //       console.log("❌ Invalid email — user not found in DB");
+// // // //       return res.status(400).json({ error: 'Invalid email or password' });
+// // // //     }
+
 // // // //     const isMatch = await bcrypt.compare(password, user.passwordHash);
-// // // //     if (!isMatch)
-// // // //       return res.status(400).json({ error: 'Invalid email or password' });
+// // // //     console.log("🔍 Password match status:", isMatch);
 
-// // // //     // Step 4: Generate JWT token
+// // // //     if (!isMatch) {
+// // // //       console.log("❌ Invalid password for:", user.email);
+// // // //       return res.status(400).json({ error: 'Invalid email or password' });
+// // // //     }
+
 // // // //     const token = jwt.sign(
 // // // //       { id: user._id, role: user.role },
 // // // //       process.env.JWT_SECRET,
-// // // //       { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m' }
+// // // //       { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '7d' }
 // // // //     );
+
+// // // //     console.log("✅ Login successful for:", user.email);
+// // // //     console.log("=====================================");
 
 // // // //     res.json({
 // // // //       message: 'Login successful',
@@ -95,339 +406,567 @@
 // // // //       name: user.name,
 // // // //     });
 // // // //   } catch (err) {
-// // // //     console.error('Login Error:', err);
+// // // //     console.error("💥 Login Error:", err);
+// // // //     res.status(500).json({ error: 'Server error' });
+// // // //   }
+// // // // });
+
+// // // // // =============================
+// // // // // ✅ GET ALL STAFF (Admin only)
+// // // // // =============================
+// // // // router.get('/staff', async (req, res) => {
+// // // //   try {
+// // // //     const token = req.headers.authorization?.split(' ')[1];
+// // // //     if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+// // // //     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+// // // //     if (decoded.role !== 'admin')
+// // // //       return res.status(403).json({ error: 'Access denied' });
+
+// // // //     const staff = await User.find({ role: 'staff' }).select('-passwordHash');
+// // // //     res.json(staff);
+// // // //   } catch (err) {
+// // // //     console.error('Staff fetch error:', err);
 // // // //     res.status(500).json({ error: 'Server error' });
 // // // //   }
 // // // // });
 
 // // // // module.exports = router;
-// // // const express = require('express');
+// // // // const express = require("express");
+// // // // const router = express.Router();
+// // // // const User = require("../models/User");
+// // // // const bcrypt = require("bcryptjs");
+// // // // const jwt = require("jsonwebtoken");
+
+// // // // // =============================
+// // // // // 🔐 LOGIN ROUTE WITH DEBUG LOGS
+// // // // // =============================
+// // // // router.post("/login", async (req, res) => {
+// // // //   try {
+// // // //     const { email, password } = req.body;
+// // // //     console.log("=====================================");
+// // // //     console.log("🟢 Login attempt received");
+// // // //     console.log("📧 Email entered:", email);
+// // // //     console.log("🔑 Password entered (length):", password ? password.length : 0);
+
+// // // //     // ✅ Validate inputs
+// // // //     if (!email || !password) {
+// // // //       console.log("❌ Missing email or password");
+// // // //       return res.status(400).json({ error: "Email and password required" });
+// // // //     }
+
+// // // //     // ✅ Check user existence
+// // // //     const user = await User.findOne({ email: email.trim().toLowerCase() });
+// // // //     console.log("👤 User found in DB:", user ? user.email : "No user found");
+
+// // // //     if (!user) {
+// // // //       console.log("❌ Invalid email — user not found in DB");
+// // // //       return res.status(400).json({ error: "Invalid email or password" });
+// // // //     }
+
+// // // //     // ✅ Check password
+// // // //     const isMatch = await bcrypt.compare(password, user.passwordHash);
+// // // //     console.log("🔍 Password match status:", isMatch);
+
+// // // //     if (!isMatch) {
+// // // //       console.log("❌ Invalid password for:", user.email);
+// // // //       return res.status(400).json({ error: "Invalid email or password" });
+// // // //     }
+
+// // // //     // ✅ Generate token (7 days expiry)
+// // // //     const token = jwt.sign(
+// // // //       { id: user._id, role: user.role },
+// // // //       process.env.JWT_SECRET,
+// // // //       { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || "7d" }
+// // // //     );
+
+// // // //     console.log("✅ Login successful for:", user.email);
+// // // //     console.log("=====================================");
+
+// // // //     return res.json({
+// // // //       message: "Login successful",
+// // // //       token,
+// // // //       role: user.role,
+// // // //       name: user.name,
+// // // //     });
+// // // //   } catch (err) {
+// // // //     console.error("💥 Login Error:", err);
+// // // //     res.status(500).json({ error: "Server error" });
+// // // //   }
+// // // // });
+
+// // // // // =============================
+// // // // // 👥 GET ALL STAFF (Admin only)
+// // // // // =============================
+// // // // router.get("/staff", async (req, res) => {
+// // // //   try {
+// // // //     const token = req.headers.authorization?.split(" ")[1];
+// // // //     if (!token) {
+// // // //       console.log("🚫 No token provided in Authorization header");
+// // // //       return res.status(401).json({ error: "Unauthorized — token missing" });
+// // // //     }
+
+// // // //     // ✅ Verify token safely (catch expiration separately)
+// // // //     let decoded;
+// // // //     try {
+// // // //       decoded = jwt.verify(token, process.env.JWT_SECRET);
+// // // //     } catch (err) {
+// // // //       if (err.name === "TokenExpiredError") {
+// // // //         console.log("⚠️ Token expired at:", err.expiredAt);
+// // // //         return res.status(401).json({ error: "Token expired, please log in again" });
+// // // //       }
+// // // //       console.log("❌ Invalid token:", err.message);
+// // // //       return res.status(401).json({ error: "Invalid token" });
+// // // //     }
+
+// // // //     // ✅ Role check
+// // // //     if (decoded.role !== "admin") {
+// // // //       console.log("⛔ Access denied for role:", decoded.role);
+// // // //       return res.status(403).json({ error: "Access denied" });
+// // // //     }
+
+// // // //     // ✅ Fetch all staff
+// // // //     const staff = await User.find({ role: "staff" }).select("-passwordHash");
+// // // //     console.log(`✅ ${staff.length} staff members fetched`);
+// // // //     return res.json(staff);
+// // // //   } catch (err) {
+// // // //     console.error("💥 Staff fetch error:", err);
+// // // //     res.status(500).json({ error: "Server error" });
+// // // //   }
+// // // // });
+
+// // // // module.exports = router;
+// // // const express = require("express");
 // // // const router = express.Router();
-// // // const User = require('../models/User');
-// // // const bcrypt = require('bcryptjs');
-// // // const jwt = require('jsonwebtoken');
+// // // const User = require("../models/User");
+// // // const bcrypt = require("bcryptjs");
+// // // const jwt = require("jsonwebtoken");
 
 // // // // =============================
-// // // // REGISTER USER (Admin/Staff)
+// // // // 🔐 LOGIN ROUTE WITH DEBUG LOGS
 // // // // =============================
-// // // router.post('/register', async (req, res) => {
-// // //   try {
-// // //     const { name, email, password, role } = req.body;
-
-// // //     const existingUser = await User.findOne({ email });
-// // //     if (existingUser)
-// // //       return res.status(400).json({ error: 'User already exists' });
-
-// // //     const hash = await bcrypt.hash(password, 10);
-// // //     const user = new User({
-// // //       name,
-// // //       email: email.trim().toLowerCase(),
-// // //       passwordHash: hash,
-// // //       role,
-// // //     });
-// // //     await user.save();
-
-// // //     res.json({ message: 'User registered successfully' });
-// // //   } catch (err) {
-// // //     console.error('Register Error:', err);
-// // //     res.status(500).json({ error: 'Server error' });
-// // //   }
-// // // });
-
-// // // // =============================
-// // // // LOGIN USER (Admin/Staff)
-// // // // =============================
-// // // router.post('/login', async (req, res) => {
+// // // router.post("/login", async (req, res) => {
 // // //   try {
 // // //     const { email, password } = req.body;
+// // //     console.log("=====================================");
+// // //     console.log("🟢 Login attempt received");
+// // //     console.log("📧 Email entered:", email);
+// // //     console.log("🔑 Password entered (length):", password ? password.length : 0);
 
-// // //     if (!email || !password)
-// // //       return res.status(400).json({ error: 'Email and password required' });
+// // //     // ✅ Validate inputs
+// // //     if (!email || !password) {
+// // //       console.log("❌ Missing email or password");
+// // //       return res.status(400).json({ error: "Email and password required" });
+// // //     }
 
+// // //     // ✅ Check user existence
 // // //     const user = await User.findOne({ email: email.trim().toLowerCase() });
+// // //     console.log("👤 User found in DB:", user ? user.email : "No user found");
 
-// // //     // 🟢 Debugging Logs
-// // //     console.log("Login attempt:", email);
-// // //     console.log("User found:", user ? user.email : '❌ Not found');
+// // //     if (!user) {
+// // //       console.log("❌ Invalid email — user not found in DB");
+// // //       return res.status(400).json({ error: "Invalid email or password" });
+// // //     }
 
-// // //     if (!user)
-// // //       return res.status(400).json({ error: 'Invalid email or password' });
+// // //     // ✅ Check password (using correct field)
+// // //     const isMatch = await bcrypt.compare(password, user.password);
+// // //     console.log("🔍 Password match status:", isMatch);
 
-// // //     const isMatch = await bcrypt.compare(password, user.passwordHash);
+// // //     if (!isMatch) {
+// // //       console.log("❌ Invalid password for:", user.email);
+// // //       return res.status(400).json({ error: "Invalid email or password" });
+// // //     }
 
-// // //     // 🟢 Debugging Logs
-// // //     console.log("Password valid:", isMatch);
-
-// // //     if (!isMatch)
-// // //       return res.status(400).json({ error: 'Invalid email or password' });
-
+// // //     // ✅ Generate token
 // // //     const token = jwt.sign(
 // // //       { id: user._id, role: user.role },
 // // //       process.env.JWT_SECRET,
-// // //       { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m' }
+// // //       { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || "7d" }
 // // //     );
 
-// // //     res.json({
-// // //       message: 'Login successful',
+// // //     console.log("✅ Login successful for:", user.email);
+// // //     console.log("=====================================");
+
+// // //     return res.json({
+// // //       message: "Login successful",
 // // //       token,
 // // //       role: user.role,
 // // //       name: user.name,
 // // //     });
 // // //   } catch (err) {
-// // //     console.error('Login Error:', err);
-// // //     res.status(500).json({ error: 'Server error' });
+// // //     console.error("💥 Login Error:", err);
+// // //     res.status(500).json({ error: "Server error" });
+// // //   }
+// // // });
+
+// // // // =============================
+// // // // 👥 GET ALL STAFF (Admin only)
+// // // // =============================
+// // // router.get("/staff", async (req, res) => {
+// // //   try {
+// // //     const token = req.headers.authorization?.split(" ")[1];
+// // //     if (!token) {
+// // //       console.log("🚫 No token provided in Authorization header");
+// // //       return res.status(401).json({ error: "Unauthorized — token missing" });
+// // //     }
+
+// // //     // ✅ Verify token safely
+// // //     let decoded;
+// // //     try {
+// // //       decoded = jwt.verify(token, process.env.JWT_SECRET);
+// // //     } catch (err) {
+// // //       if (err.name === "TokenExpiredError") {
+// // //         console.log("⚠️ Token expired at:", err.expiredAt);
+// // //         return res.status(401).json({ error: "Token expired, please log in again" });
+// // //       }
+// // //       console.log("❌ Invalid token:", err.message);
+// // //       return res.status(401).json({ error: "Invalid token" });
+// // //     }
+
+// // //     // ✅ Role check
+// // //     if (decoded.role !== "admin") {
+// // //       console.log("⛔ Access denied for role:", decoded.role);
+// // //       return res.status(403).json({ error: "Access denied" });
+// // //     }
+
+// // //     // ✅ Fetch all staff
+// // //     const staff = await User.find({ role: "staff" }).select("-password");
+// // //     console.log(`✅ ${staff.length} staff members fetched`);
+// // //     return res.json(staff);
+// // //   } catch (err) {
+// // //     console.error("💥 Staff fetch error:", err);
+// // //     res.status(500).json({ error: "Server error" });
 // // //   }
 // // // });
 
 // // // module.exports = router;
-// // router.post('/login', async (req, res) => {
-// //   try {
-// //     const { email, password } = req.body;
-// //     console.log("=====================================");
-// //     console.log("🟢 Login attempt received");
-// //     console.log("📧 Email entered:", email);
-// //     console.log("🔑 Password entered (length):", password ? password.length : 0);
-
-// //     // Step 1: Check input
-// //     if (!email || !password) {
-// //       console.log("❌ Missing email or password");
-// //       return res.status(400).json({ error: 'Email and password required' });
-// //     }
-
-// //     // Step 2: Find user
-// //     const user = await User.findOne({ email: email.trim().toLowerCase() });
-// //     console.log("👤 User found in DB:", user ? user.email : "No user found");
-
-// //     if (!user) {
-// //       console.log("❌ Invalid email — user not found in DB");
-// //       return res.status(400).json({ error: 'Invalid email or password' });
-// //     }
-
-// //     // Step 3: Check password
-// //     const isMatch = await bcrypt.compare(password, user.passwordHash);
-// //     console.log("🔍 Password match status:", isMatch);
-
-// //     if (!isMatch) {
-// //       console.log("❌ Invalid password for:", user.email);
-// //       return res.status(400).json({ error: 'Invalid email or password' });
-// //     }
-
-// //     // Step 4: Generate token
-// //     const token = jwt.sign(
-// //       { id: user._id, role: user.role },
-// //       process.env.JWT_SECRET,
-// //       { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m' }
-// //     );
-
-// //     console.log("✅ Login successful for:", user.email);
-// //     console.log("=====================================");
-
-// //     res.json({
-// //       message: 'Login successful',
-// //       token,
-// //       role: user.role,
-// //       name: user.name,
-// //     });
-
-// //   } catch (err) {
-// //     console.error("💥 Login Error:", err);
-// //     res.status(500).json({ error: 'Server error' });
-// //   }
-// // });
-// // const express = require('express');
+// // const express = require("express");
 // // const router = express.Router();
-// // const User = require('../models/User');
-// // const bcrypt = require('bcryptjs');
-// // const jwt = require('jsonwebtoken');
+// // const bcrypt = require("bcryptjs");
+// // const jwt = require("jsonwebtoken");
+// // const User = require("../models/User");
 
-// // // =============================
-// // // LOGIN ROUTE WITH DEBUG LOGS
-// // // =============================
-// // router.post('/login', async (req, res) => {
+// // router.post("/login", async (req, res) => {
 // //   try {
 // //     const { email, password } = req.body;
-// //     console.log("=====================================");
-// //     console.log("🟢 Login attempt received");
-// //     console.log("📧 Email entered:", email);
-// //     console.log("🔑 Password entered (length):", password ? password.length : 0);
+// //     console.log("🟢 Login attempt:", email);
 
-// //     if (!email || !password) {
-// //       console.log("❌ Missing email or password");
-// //       return res.status(400).json({ error: 'Email and password required' });
+// //     // 1️⃣ Check if user exists
+// //     const user = await User.findOne({ email });
+// //     if (!user) {
+// //       return res.status(400).json({ success: false, message: "User not found" });
 // //     }
 
-// //     const user = await User.findOne({ email: email.trim().toLowerCase() });
-// //     console.log("👤 User found in DB:", user ? user.email : "No user found");
+// //     // 2️⃣ Compare password
+// //     const isMatch = await bcrypt.compare(password, user.passwordHash);
+// //     if (!isMatch) {
+// //       return res.status(400).json({ success: false, message: "Invalid password" });
+// //     }
 
+// //     // 3️⃣ Generate JWT
+// //     const token = jwt.sign(
+// //       { id: user._id, role: user.role },
+// //       process.env.JWT_SECRET,
+// //       { expiresIn: "7d" }
+// //     );
+
+// //     console.log("✅ Login success:", user.email);
+
+// //     // 4️⃣ Send response
+// //     res.json({
+// //       success: true,
+// //       message: "Login successful",
+// //       token,
+// //       user: {
+// //         id: user._id,
+// //         name: user.name,
+// //         email: user.email,
+// //         role: user.role,
+// //       },
+// //     });
+// //   } catch (err) {
+// //     console.error("❌ Login error:", err);
+// //     res.status(500).json({ success: false, message: "Server error", error: err.message });
+// //   }
+// // });
+
+// // module.exports = router;
+// // const express = require("express");
+// // const router = express.Router();
+// // const bcrypt = require("bcryptjs");
+// // const jwt = require("jsonwebtoken");
+// // const User = require("../models/User");
+
+// // // =============================
+// // // 🧾 REGISTER
+// // // =============================
+// // router.post("/register", async (req, res) => {
+// //   try {
+// //     const { name, email, password, role } = req.body;
+
+// //     const existing = await User.findOne({ email });
+// //     if (existing) {
+// //       return res.status(400).json({ success: false, message: "Email already registered" });
+// //     }
+
+// //     const passwordHash = await bcrypt.hash(password, 10);
+
+// //     const newUser = new User({
+// //       name,
+// //       email,
+// //       passwordHash,
+// //       role: role || "customer",
+// //     });
+
+// //     await newUser.save();
+
+// //     res.json({
+// //       success: true,
+// //       message: "User registered successfully",
+// //       user: {
+// //         id: newUser._id,
+// //         name: newUser.name,
+// //         email: newUser.email,
+// //         role: newUser.role,
+// //       },
+// //     });
+// //   } catch (err) {
+// //     console.error("❌ Register error:", err);
+// //     res.status(500).json({ success: false, message: "Server error", error: err.message });
+// //   }
+// // });
+
+// // // =============================
+// // // 🔐 LOGIN
+// // // =============================
+// // router.post("/login", async (req, res) => {
+// //   try {
+// //     const { email, password } = req.body;
+// //     console.log("🟢 Login attempt:", email);
+
+// //     const user = await User.findOne({ email });
 // //     if (!user) {
-// //       console.log("❌ Invalid email — user not found in DB");
-// //       return res.status(400).json({ error: 'Invalid email or password' });
+// //       return res.status(400).json({ success: false, message: "User not found" });
 // //     }
 
 // //     const isMatch = await bcrypt.compare(password, user.passwordHash);
-// //     console.log("🔍 Password match status:", isMatch);
-
 // //     if (!isMatch) {
-// //       console.log("❌ Invalid password for:", user.email);
-// //       return res.status(400).json({ error: 'Invalid email or password' });
+// //       return res.status(400).json({ success: false, message: "Invalid password" });
 // //     }
 
 // //     const token = jwt.sign(
 // //       { id: user._id, role: user.role },
 // //       process.env.JWT_SECRET,
-// //       { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m' }
+// //       { expiresIn: "7d" }
 // //     );
 
-// //     console.log("✅ Login successful for:", user.email);
-// //     console.log("=====================================");
+// //     console.log("✅ Login success:", user.email);
 
 // //     res.json({
-// //       message: 'Login successful',
+// //       success: true,
+// //       message: "Login successful",
 // //       token,
-// //       role: user.role,
-// //       name: user.name,
+// //       user: {
+// //         id: user._id,
+// //         name: user.name,
+// //         email: user.email,
+// //         role: user.role,
+// //       },
 // //     });
-
 // //   } catch (err) {
-// //     console.error("💥 Login Error:", err);
-// //     res.status(500).json({ error: 'Server error' });
+// //     console.error("❌ Login error:", err);
+// //     res.status(500).json({ success: false, message: "Server error", error: err.message });
 // //   }
 // // });
 
-// // // ✅ Export router at end
 // // module.exports = router;
+// // const express = require("express");
+// // const router = express.Router();
+// // const bcrypt = require("bcryptjs");
+// // const jwt = require("jsonwebtoken");
+// // const User = require("../models/User");
 
+// // // =============================
+// // // 🧾 REGISTER
+// // // =============================
+// // router.post("/register", async (req, res) => {
+// //   try {
+// //     const { name, email, password, role } = req.body;
 
+// //     const existing = await User.findOne({ email });
+// //     if (existing) {
+// //       return res.status(400).json({ success: false, message: "Email already registered" });
+// //     }
 
-// const express = require('express');
+// //     const passwordHash = await bcrypt.hash(password, 10);
+
+// //     const newUser = new User({
+// //       name,
+// //       email,
+// //       passwordHash,
+// //       role: role || "customer",
+// //     });
+
+// //     await newUser.save();
+
+// //     res.json({
+// //       success: true,
+// //       message: "User registered successfully",
+// //       user: {
+// //         id: newUser._id,
+// //         name: newUser.name,
+// //         email: newUser.email,
+// //         role: newUser.role,
+// //       },
+// //     });
+// //   } catch (err) {
+// //     console.error("❌ Register error:", err);
+// //     res.status(500).json({ success: false, message: "Server error", error: err.message });
+// //   }
+// // });
+
+// // // =============================
+// // // 🔐 LOGIN
+// // // =============================
+// // router.post("/login", async (req, res) => {
+// //   try {
+// //     const { email, password } = req.body;
+// //     console.log("🟢 Login attempt:", email);
+
+// //     const user = await User.findOne({ email });
+// //     if (!user) {
+// //       return res.status(400).json({ success: false, message: "User not found" });
+// //     }
+
+// //     const isMatch = await bcrypt.compare(password, user.passwordHash);
+// //     if (!isMatch) {
+// //       return res.status(400).json({ success: false, message: "Invalid password" });
+// //     }
+
+// //     // ✅ Securely create JWT using .env values
+// //     const token = jwt.sign(
+// //       { userId: user._id, role: user.role },
+// //       process.env.JWT_SECRET, // secret from .env
+// //       { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || "15m" }
+// //     );
+
+// //     console.log("✅ Login success:", user.email);
+
+// //     res.json({
+// //       success: true,
+// //       message: "Login successful",
+// //       token,
+// //       user: {
+// //         id: user._id,
+// //         name: user.name,
+// //         email: user.email,
+// //         role: user.role,
+// //       },
+// //     });
+// //   } catch (err) {
+// //     console.error("❌ Login error:", err);
+// //     res.status(500).json({ success: false, message: "Server error", error: err.message });
+// //   }
+// // });
+
+// // module.exports = router;
+// const express = require("express");
 // const router = express.Router();
-// const jwt = require('jsonwebtoken');
-// const MenuItem = require('../models/MenuItem');
+// const bcrypt = require("bcryptjs");
+// const jwt = require("jsonwebtoken");
+// const User = require("../models/User");
 
-// // ===========================
-// // GET ALL MENU ITEMS
-// // ===========================
-// router.get('/', async (req, res) => {
+// // =============================
+// // 🧾 REGISTER
+// // =============================
+// router.post("/register", async (req, res) => {
 //   try {
-//     const token = req.headers.authorization?.split(' ')[1];
-//     if (!token) return res.status(401).json({ error: 'Unauthorized' });
+//     const { name, email, password, role } = req.body;
 
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//     const role = decoded.role;
-
-//     let items;
-
-//     if (role === 'staff' || role === 'admin') {
-//       // Staff/Admin can see all menu items
-//       items = await MenuItem.find();
-//     } else {
-//       // Customer view (based on tableSlug)
-//       const tableSlug = req.query.tableSlug;
-//       if (!tableSlug) return res.status(400).json({ error: 'Table slug required' });
-//       items = await MenuItem.find({ tableSlug });
+//     // check if user already exists
+//     const existing = await User.findOne({ email });
+//     if (existing) {
+//       return res.status(400).json({ success: false, message: "Email already registered" });
 //     }
 
-//     if (!items || items.length === 0)
-//       return res.json({ message: 'No menu items found' });
+//     // hash password
+//     const passwordHash = await bcrypt.hash(password, 10);
 
-//     res.json(items);
+//     const newUser = new User({
+//       name,
+//       email,
+//       passwordHash,
+//       role: role || "customer",
+//     });
+
+//     await newUser.save();
+
+//     res.json({
+//       success: true,
+//       message: "User registered successfully",
+//       user: {
+//         id: newUser._id,
+//         name: newUser.name,
+//         email: newUser.email,
+//         role: newUser.role,
+//       },
+//     });
 //   } catch (err) {
-//     console.error('Menu fetch error:', err);
-//     res.status(500).json({ error: 'Server error' });
+//     console.error("❌ Register error:", err);
+//     res.status(500).json({ success: false, message: "Server error", error: err.message });
 //   }
 // });
 
-// // ===========================
-// // GET ALL CATEGORIES
-// // ===========================
-// router.get('/categories', async (req, res) => {
-//   try {
-//     // Fetch unique category names from MenuItem model
-//     const categories = await MenuItem.distinct("category");
-//     res.json(categories);
-//   } catch (err) {
-//     console.error('Category fetch error:', err);
-//     res.status(500).json({ error: 'Server error' });
-//   }
-// });
-
-// module.exports = router;
-// const express = require('express');
-// const router = express.Router();
-// const User = require('../models/User');
-// const bcrypt = require('bcryptjs');
-// const jwt = require('jsonwebtoken');
-
 // // =============================
-// // LOGIN ROUTE WITH DEBUG LOGS
+// // 🔐 LOGIN
 // // =============================
-// router.post('/login', async (req, res) => {
+// router.post("/login", async (req, res) => {
 //   try {
 //     const { email, password } = req.body;
-//     console.log("=====================================");
-//     console.log("🟢 Login attempt received");
-//     console.log("📧 Email entered:", email);
-//     console.log("🔑 Password entered (length):", password ? password.length : 0);
+//     console.log("🟢 Login attempt:", email);
 
-//     if (!email || !password) {
-//       console.log("❌ Missing email or password");
-//       return res.status(400).json({ error: 'Email and password required' });
-//     }
-
-//     const user = await User.findOne({ email: email.trim().toLowerCase() });
-//     console.log("👤 User found in DB:", user ? user.email : "No user found");
-
+//     const user = await User.findOne({ email });
 //     if (!user) {
-//       console.log("❌ Invalid email — user not found in DB");
-//       return res.status(400).json({ error: 'Invalid email or password' });
+//       return res.status(400).json({ success: false, message: "User not found" });
 //     }
 
 //     const isMatch = await bcrypt.compare(password, user.passwordHash);
-//     console.log("🔍 Password match status:", isMatch);
-
 //     if (!isMatch) {
-//       console.log("❌ Invalid password for:", user.email);
-//       return res.status(400).json({ error: 'Invalid email or password' });
+//       return res.status(400).json({ success: false, message: "Invalid password" });
 //     }
 
+//     // ✅ Ensure JWT secret is defined
+//     if (!process.env.JWT_SECRET) {
+//       console.error("❌ Missing JWT_SECRET in .env");
+//       return res.status(500).json({
+//         success: false,
+//         message: "Server configuration error: Missing JWT secret",
+//       });
+//     }
+
+//     // ✅ Create JWT token
 //     const token = jwt.sign(
-//       { id: user._id, role: user.role },
+//       { userId: user._id, role: user.role },
 //       process.env.JWT_SECRET,
-//       { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '7d' }
+//       { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || "1h" }
 //     );
 
-//     console.log("✅ Login successful for:", user.email);
-//     console.log("=====================================");
+//     console.log("✅ Login success:", user.email);
 
 //     res.json({
-//       message: 'Login successful',
+//       success: true,
+//       message: "Login successful",
 //       token,
-//       role: user.role,
-//       name: user.name,
+//       user: {
+//         id: user._id,
+//         name: user.name,
+//         email: user.email,
+//         role: user.role,
+//       },
 //     });
 //   } catch (err) {
-//     console.error("💥 Login Error:", err);
-//     res.status(500).json({ error: 'Server error' });
-//   }
-// });
-
-// // =============================
-// // ✅ GET ALL STAFF (Admin only)
-// // =============================
-// router.get('/staff', async (req, res) => {
-//   try {
-//     const token = req.headers.authorization?.split(' ')[1];
-//     if (!token) return res.status(401).json({ error: 'Unauthorized' });
-
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//     if (decoded.role !== 'admin')
-//       return res.status(403).json({ error: 'Access denied' });
-
-//     const staff = await User.find({ role: 'staff' }).select('-passwordHash');
-//     res.json(staff);
-//   } catch (err) {
-//     console.error('Staff fetch error:', err);
-//     res.status(500).json({ error: 'Server error' });
+//     console.error("❌ Login error:", err);
+//     res.status(500).json({ success: false, message: "Server error", error: err.message });
 //   }
 // });
 

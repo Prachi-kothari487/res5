@@ -596,7 +596,7 @@ const Login = () => {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.post("http://10.21.218.69:4000/api/auth/login", loginData);
+      const res = await axios.post("http://10.137.209.69:4000/api/auth/login", loginData);
       const { role, token } = res.data;
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
@@ -615,7 +615,7 @@ const Login = () => {
     setLoading(true);
     setError("");
     try {
-      await axios.post("http://10.21.218.69:4000/api/auth/register", registerData);
+      await axios.post("http://10.137.209.69:4000/api/auth/register", registerData);
       alert("Account created successfully! You can now login.");
       setTab("login");
     } catch (err) {

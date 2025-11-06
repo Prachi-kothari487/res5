@@ -3542,7 +3542,7 @@ const Menu = () => {
   const [loading, setLoading] = useState(true);
 
   // ✅ Your backend IP (change only if network IP changes)
-  const BASE_URL = "http://10.21.218.69:4000";
+  const BASE_URL = "http://10.137.209.69:4000";
 
   // ✅ Fetch categories & menu items
   useEffect(() => {

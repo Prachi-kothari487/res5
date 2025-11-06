@@ -8056,7 +8056,7 @@ import { QRCodeCanvas } from "qrcode.react";
  * - Backend base: change BASE if needed
  */
 
-const BASE = "http://10.21.218.69:4000";
+const BASE = "http://10.137.209.69:4000";
 
 const api = axios.create({
   baseURL: BASE,
@@ -8360,7 +8360,7 @@ const TablesSection = ({ tables, styles, safeMap, handleDeleteTable }) => (
           <div key={t._id} style={styles.card}>
             <div style={{ fontWeight: 700 }}>Table {t.number}</div>
             <div style={{ marginTop: 8 }}>
-              <QRCodeCanvas value={`http://10.21.218.69:5173/menu/${t.qrSlug}`} size={90} />
+              <QRCodeCanvas value={`http://10.137.209.69:5173/menu/${t.qrSlug}`} size={90} />
             </div>
             <div style={{ marginTop: 8 }}>Slug: {t.qrSlug}</div>
             <div style={{ marginTop: 8 }}>

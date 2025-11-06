@@ -1208,7 +1208,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // 🧠 Auto-detect frontend base URL
-const baseURL = process.env.BASE_URL || "http://10.21.218.69:5173";
+const baseURL = process.env.BASE_URL || "http://10.137.209.69:5173";
 
 // ✅ Middleware
 app.use(express.json());
@@ -1225,7 +1225,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",      // for local dev
-      "http://10.21.218.69:5173",   // for LAN/mobile testing
+      "http://10.137.209.69:5173",   // for LAN/mobile testing
     ],
     credentials: true,
   })
@@ -1280,7 +1280,7 @@ mongoose
     // ✅ Start server
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running at: http://localhost:${PORT}`);
-      console.log(`🌐 Accessible on network: http://10.21.218.69:${PORT}`);
+      console.log(`🌐 Accessible on network: http://10.137.209.69:${PORT}`);
     });
   })
   .catch((err) => console.error("❌ MongoDB connection error:", err.message));
